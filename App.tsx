@@ -12,6 +12,78 @@ import {
   calculateItemTotal
 } from './utils';
 
+function App() {
+  // ... (giữ nguyên các state cũ)
+  const [history, setHistory] = useState<Order[]>(() => {
+    const saved = localStorage.getItem('bacdepzai_history');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  // ... (giữ nguyên các hàm bổ trợ khác)
+
+  const saveOrder = async (order: Order) => {
+    // 1. Lưu vào máy cục bộ (LocalStorage)
+    const newHistory = [order, ...history];
+    setHistory(newHistory);
+    localStorage.setItem('bacdepzai_history', JSON.stringify(newHistory));
+
+    // 2. ĐỒNG BỘ LÊN GOOGLE SHEETS
+    // BẠN CẦN THAY LINK DƯỚI ĐÂY BẰNG LINK WEB APP URL CỦA BẠN
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzpqNsp2lBtp4ZvT4qh8itl43yRoy4pa58DlHME4fIZDoi8lvT_IeTV-aqPhTy3QbM/exec";
+
+    try {
+      const dataToSheet = {
+        orderNo: order.orderNo,
+        customerName: order.customerName,
+        date: order.date,
+        totalAmount: order.totalAmount,
+        // Chuyển đổi dữ liệu items sang tiếng Việt để khớp với bảng tính
+        items: order.items.map(item => ({
+          tenHang: item.name,
+          quyCach: item.specification,
+          chieuDai: item.length,
+          soLuong: item.quantity,
+          dvt: item.unit,
+          metVuong: item.area,
+          thanhTien: item.total
+        }))
+      };
+
+      await fetch(GOOGLE_SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Tránh lỗi CORS khi gửi từ trình duyệt
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSheet)
+      });
+      
+      console.log("Đã đồng bộ lên Google Sheets thành công!");
+    } catch (error) {
+      console.error("Lỗi đồng bộ Sheets:", error);
+    }
+
+    // 3. Reset form về trạng thái ban đầu
+    setCurrentOrder({
+      id: '',
+      orderNo: '',
+      customerName: '',
+      date: new Date().toISOString().split('T')[0],
+      items: [],
+      totalAmount: 0,
+      createdAt: Date.now()
+    });
+    setActiveTab('history');
+    alert("Đã lưu đơn và đồng bộ lên hệ thống!");
+  };
+
+  // ... (Các phần còn lại của file App.tsx giữ nguyên hoàn toàn)
+  
+  return (
+    // ... JSX giữ nguyên
+  );
+}
+
+export default App;
+
 const EMPTY_ITEM: OrderItem = {
   id: '',
   name: '',
