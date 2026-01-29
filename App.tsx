@@ -52,25 +52,6 @@ const App: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'form' | 'history' | 'stats'>('form');
   const [showPrintModal, setShowPrintModal] = useState(false);
-  // Tìm hàm lưu đơn của bạn (ví dụ đặt tên là handleSaveOrder)
-const handleSaveOrder = async (orderData: Order) => {
-  // 1. Giữ nguyên code lưu localStorage hiện tại của bạn
-  // ... code cũ ...
-
-  // 2. Thêm code gửi lên Google Sheets bên dưới
-  const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzpqNsp2lBtp4ZvT4qh8itl43yRoy4pa58DlHME4fIZDoi8lvT_IeTV-aqPhTy3QbM/exec";
-  
-  try {
-    await fetch(GOOGLE_SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify(orderData) // Gửi toàn bộ đối tượng order
-    });
-    console.log("Đã đồng bộ lên Google Sheets");
-  } catch (error) {
-    console.error("Lỗi đồng bộ:", error);
-  }
-};
 
   // AI Assistant State
   const [showAIChat, setShowAIChat] = useState(false);
